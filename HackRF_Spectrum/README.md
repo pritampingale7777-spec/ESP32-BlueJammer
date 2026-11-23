@@ -28,3 +28,15 @@ python hackrf_spectrum.py
 - The lowest frequency is 1 MHz. HackRF One cannot tune to 1 Hz.
 - Levels are relative dB from `hackrf_sweep`, not calibrated power.
 - Save CSV writes `freq_hz, latest_db, maxhold_db`.
+
+## Study / monitoring (`spectrum_monitor.py`)
+Logs the spectrum over time and reports how often each common band is occupied
+(percent of bins above a dB threshold). It records activity only and does not
+track individual transmissions.
+
+```
+python spectrum_monitor.py --log band_log.csv --threshold -60 --interval 30
+python spectrum_monitor.py --start 400 --stop 1000 --duration 3600 --log ism.csv
+```
+
+`--threshold` is in uncalibrated dB, so tune it to your noise floor first.
