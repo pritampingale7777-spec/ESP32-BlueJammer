@@ -40,3 +40,14 @@ python spectrum_monitor.py --start 400 --stop 1000 --duration 3600 --log ism.csv
 ```
 
 `--threshold` is in uncalibrated dB, so tune it to your noise floor first.
+
+## Install on Windows
+1. Install Python 3.9+ from https://www.python.org/downloads/ and tick **Add python.exe to PATH**.
+   In the Python installer, keep **tcl/tk and IDLE** enabled (needed for the GUI).
+2. Download the HackRF host tools from https://github.com/greatscottgadgets/hackrf/releases,
+   extract them, and add the folder that contains `hackrf_sweep.exe` to your PATH.
+3. Keep `install_windows.bat`, `hackrf_spectrum.py`, `spectrum_monitor.py` and `README.md` in one folder.
+4. Double-click `install_windows.bat`. It copies the files to `%LOCALAPPDATA%\HackRF_Spectrum`,
+   creates launchers and a desktop shortcut, and checks for `hackrf_sweep`.
+
+To uninstall, delete the `%LOCALAPPDATA%\HackRF_Spectrum` folder and the desktop shortcut.
