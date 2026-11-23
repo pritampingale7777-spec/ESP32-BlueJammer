@@ -93,6 +93,17 @@ def nice_step(span):
     return 10 * mag
 
 
+def pick_peaks(data, n=15, min_sep_khz=10000):
+    """Return the n strongest (freq_khz, db) peaks, skipping bins near a stronger peak."""
+    chosen = []
+    for k, db in sorted(data.items(), key=lambda kv: kv[1], reverse=True):
+        if all(abs(k - ck) >= min_sep_khz for ck, _ in chosen):
+            chosen.append((k, db))
+            if len(chosen) == n:
+                break
+    return chosen
+
+
 class SweepRunner:
     """Runs hackrf_sweep in a subprocess and reads its output on a thread."""
 
@@ -134,7 +145,7 @@ if tk is not None:
         def __init__(self):
             super().__init__()
             self.title("HackRF Full-Spectrum Scanner (1 MHz - 6 GHz)")
-            self.geometry("1180x720")
+            self.geometry("1280x760")
             self.runner = None
             self.q = queue.Queue()
             self.latest = {}    # freq_khz -> db (live)
@@ -201,15 +212,16 @@ if tk is not None:
                                     bg="#101418", highlightthickness=0)
             self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-            side = ttk.Frame(body, padding=(8, 0, 0, 0))
+            side = ttk.Frame(body, padding=(8, 0, 0, 0), width=270)
             side.pack(side=tk.RIGHT, fill=tk.Y)
+            side.pack_propagate(False)
             ttk.Label(side, text="Top peaks (max-hold)").pack(anchor="w")
-            self.tree = ttk.Treeview(side, columns=("freq", "db"), show="headings", height=18)
+            self.tree = ttk.Treeview(side, columns=("freq", "db"), show="headings")
             self.tree.heading("freq", text="MHz")
             self.tree.heading("db", text="dB")
-            self.tree.column("freq", width=120, anchor="e")
-            self.tree.column("db", width=80, anchor="e")
-            self.tree.pack(fill=tk.Y)
+            self.tree.column("freq", width=130, anchor="e", stretch=False)
+            self.tree.column("db", width=80, anchor="e", stretch=False)
+            self.tree.pack(fill=tk.BOTH, expand=True)
 
         # ---- actions ------------------------------------------------------
         def _start(self):
@@ -355,7 +367,7 @@ if tk is not None:
                         c.create_line(*coords, fill=color, width=1)
 
             # peaks table
-            top = sorted(self.maxhold.items(), key=lambda kv: kv[1], reverse=True)[:15]
+            top = pick_peaks(self.maxhold)
             self.tree.delete(*self.tree.get_children())
             for k, db in top:
                 self.tree.insert("", "end", values=(f"{k/1000:.3f}", f"{db:.1f}"))
